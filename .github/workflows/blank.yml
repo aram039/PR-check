@@ -20,15 +20,58 @@ jobs:
       - name: Fetch base branch
         run: git fetch origin ${{ github.event.pull_request.base.ref }}
 
-      - name: Check commit message formats
+      - name: Validate PR title and commits
         run: |
+          REGEX="^[A-Z]+-[0-9]+: .+|^Merge branch .*"
+
+          # Check PR title
+          echo "${{ github.event.pull_request.title }}" | grep -Eq "$REGEX" || {
+            echo "Invalid PR title: '${{ github.event.pull_request.title }}'"
+            exit 1
+          }
+
+          # Check each commit message
           git log --pretty=format:"%s" origin/${{ github.event.pull_request.base.ref }}..HEAD | while read -r msg; do
-            echo "$msg" | grep -Eq "^[A-Z]+-[0-9]+: .+|^Merge branch .+" || exit 1
+            echo "$msg" | grep -Eq "$REGEX" || {
+              echo "Invalid commit message: '$msg'"
+              exit 1
+            }
           done
 
-      - name: Check PR title format
-        run: |
-          echo "${{ github.event.pull_request.title }}" | grep -Eq "^[A-Z]+-[0-9]+: .+|^Merge branch .+" || exit 1
+
+
+
+# name: "PR commit and title check"
+
+# on:
+#   pull_request:
+#     branches:
+#       - main
+#       - develop
+#   workflow_dispatch:
+
+# jobs:
+#   verify_pr_format:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Check out PR code
+#         uses: actions/checkout@v4
+#         with:
+#           fetch-depth: 0
+#           ref: ${{ github.head_ref }}
+
+#       - name: Fetch base branch
+#         run: git fetch origin ${{ github.event.pull_request.base.ref }}
+
+#       - name: Check commit message formats
+#         run: |
+#           git log --pretty=format:"%s" origin/${{ github.event.pull_request.base.ref }}..HEAD | while read -r msg; do
+#             echo "$msg" | grep -Eq "^[A-Z]+-[0-9]+: .+|^Merge branch .+" || exit 1
+#           done
+
+#       - name: Check PR title format
+#         run: |
+#           echo "${{ github.event.pull_request.title }}" | grep -Eq "^[A-Z]+-[0-9]+: .+|^Merge branch .+" || exit 1
 
 
 
