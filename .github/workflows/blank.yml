@@ -1,46 +1,3 @@
-name: "PR commit and title check"
-
-on:
-  pull_request:
-    branches:
-      - main
-      - develop
-  workflow_dispatch:
-
-jobs:
-  verify_pr_format:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out PR code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          ref: ${{ github.head_ref }}
-
-      - name: Validate PR title and commits
-        run: |
-          REGEX="^[A-Z]+-[0-9]+: .+|^Merge branch .*"
-
-          # Check PR title
-          echo "${{ github.event.pull_request.title }}" | grep -Eq "$REGEX" || {
-            echo "❌ Invalid PR title: '${{ github.event.pull_request.title }}'"
-            exit 1
-          }
-
-          # Get commit range from GitHub's PR context
-          git fetch origin
-          COMMITS=$(git log --pretty=format:"%s" ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }})
-
-          for msg in $COMMITS; do
-            echo "$msg" | grep -Eq "$REGEX" || {
-              echo "❌ Invalid commit message: '$msg'"
-              exit 1
-            }
-          done
-
-
-
-
 # name: "PR commit and title check"
 
 # on:
@@ -60,99 +17,142 @@ jobs:
 #           fetch-depth: 0
 #           ref: ${{ github.head_ref }}
 
-#       - name: Fetch base branch
-#         run: git fetch origin ${{ github.event.pull_request.base.ref }}
-
-#       - name: Check commit message formats
+#       - name: Validate PR title and commits
 #         run: |
-#           git log --pretty=format:"%s" origin/${{ github.event.pull_request.base.ref }}..HEAD | while read -r msg; do
-#             echo "$msg" | grep -Eq "^[A-Z]+-[0-9]+: .+|^Merge branch .+" || exit 1
-#           done
+#           REGEX="^[A-Z]+-[0-9]+: .+|^Merge branch .*"
 
-#       - name: Check PR title format
-#         run: |
-#           echo "${{ github.event.pull_request.title }}" | grep -Eq "^[A-Z]+-[0-9]+: .+|^Merge branch .+" || exit 1
-
-
-
-# name: "PR title and commit message check"
-
-# on:
-#   pull_request:
-#     branches:
-#       - main
-#       - develop
-#   workflow_dispatch:
-
-# jobs:
-#   verify_pr_format:
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Check PR title format
-#         run: |
-#           echo "Checking PR title..."
-#           echo "DEBUG: ${{ github.event.pull_request.title }}"
-#           echo "${{ github.event.pull_request.title }}" | grep -Eq "(^[A-Z]+-[0-9]+: .+)|(^Merge branch .*)" || {
-#             echo "PR title does not match required format: ${{ github.event.pull_request.title }}"
+#           # Check PR title
+#           echo "${{ github.event.pull_request.title }}" | grep -Eq "$REGEX" || {
+#             echo "❌ Invalid PR title: '${{ github.event.pull_request.title }}'"
 #             exit 1
 #           }
 
-#       - name: Check commit message formats
-#         run: |
-#           echo "Checking commit messages..."
-#           COMMITS=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-#             "${{ github.event.pull_request.commits_url }}" | jq -r '.[].commit.message')
+#           # Get commit range from GitHub's PR context
+#           git fetch origin
+#           COMMITS=$(git log --pretty=format:"%s" ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }})
 
-#           echo "$COMMITS" | while read -r COMMIT_MSG; do
-#             echo "Checking: $COMMIT_MSG"
-#             echo "$COMMIT_MSG" | grep -Eq "(^[A-Z]+-[0-9]+: .+)|(^Merge branch .*)" || {
-#               echo "Commit message does not match required format: $COMMIT_MSG"
+#           for msg in $COMMITS; do
+#             echo "$msg" | grep -Eq "$REGEX" || {
+#               echo "❌ Invalid commit message: '$msg'"
 #               exit 1
 #             }
 #           done
 
-# name: "PR title check"
 
-# on:
-#   pull_request:
-#     branches:
-#       - main
-#       - develop
-#   workflow_dispatch:
 
-# jobs:
-#   verify_title:
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Check title syntax
-#         run: |
-#           echo "DEBUG: ${{ github.event.pull_request.title }}"
-#           echo "${{ github.event.pull_request.title }}" | grep -E "(^[A-Z]+-[0-9]+: \w+)|(^Merge branch .*)"
 
-# name: "PR commit message check"
+# # name: "PR commit and title check"
 
-# on:
-#   pull_request:
-#     branches:
-#       - main
-#       - develop
-#   workflow_dispatch:
+# # on:
+# #   pull_request:
+# #     branches:
+# #       - main
+# #       - develop
+# #   workflow_dispatch:
 
-# jobs:
-#   verify_commits:
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Check commit messages
-#         run: |
-#           echo "Checking commit messages..."
-#           # Get all commits in the PR
-#           COMMITS=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-#             "${{ github.event.pull_request.commits_url }}" | jq -r '.[].commit.message')
+# # jobs:
+# #   verify_pr_format:
+# #     runs-on: ubuntu-latest
+# #     steps:
+# #       - name: Check out PR code
+# #         uses: actions/checkout@v4
+# #         with:
+# #           fetch-depth: 0
+# #           ref: ${{ github.head_ref }}
 
-#           echo "$COMMITS" | while read -r COMMIT_MSG; do
-#             echo "Checking: $COMMIT_MSG"
-#             echo "$COMMIT_MSG" | grep -Eq "(^[A-Z]+-[0-9]+: .+)|(^Merge branch .*)" || {
-#               echo "Commit message does not match required format: $COMMIT_MSG"
-#               exit 1
-#             }
-#           done
+# #       - name: Fetch base branch
+# #         run: git fetch origin ${{ github.event.pull_request.base.ref }}
+
+# #       - name: Check commit message formats
+# #         run: |
+# #           git log --pretty=format:"%s" origin/${{ github.event.pull_request.base.ref }}..HEAD | while read -r msg; do
+# #             echo "$msg" | grep -Eq "^[A-Z]+-[0-9]+: .+|^Merge branch .+" || exit 1
+# #           done
+
+# #       - name: Check PR title format
+# #         run: |
+# #           echo "${{ github.event.pull_request.title }}" | grep -Eq "^[A-Z]+-[0-9]+: .+|^Merge branch .+" || exit 1
+
+
+
+# # name: "PR title and commit message check"
+
+# # on:
+# #   pull_request:
+# #     branches:
+# #       - main
+# #       - develop
+# #   workflow_dispatch:
+
+# # jobs:
+# #   verify_pr_format:
+# #     runs-on: ubuntu-latest
+# #     steps:
+# #       - name: Check PR title format
+# #         run: |
+# #           echo "Checking PR title..."
+# #           echo "DEBUG: ${{ github.event.pull_request.title }}"
+# #           echo "${{ github.event.pull_request.title }}" | grep -Eq "(^[A-Z]+-[0-9]+: .+)|(^Merge branch .*)" || {
+# #             echo "PR title does not match required format: ${{ github.event.pull_request.title }}"
+# #             exit 1
+# #           }
+
+# #       - name: Check commit message formats
+# #         run: |
+# #           echo "Checking commit messages..."
+# #           COMMITS=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+# #             "${{ github.event.pull_request.commits_url }}" | jq -r '.[].commit.message')
+
+# #           echo "$COMMITS" | while read -r COMMIT_MSG; do
+# #             echo "Checking: $COMMIT_MSG"
+# #             echo "$COMMIT_MSG" | grep -Eq "(^[A-Z]+-[0-9]+: .+)|(^Merge branch .*)" || {
+# #               echo "Commit message does not match required format: $COMMIT_MSG"
+# #               exit 1
+# #             }
+# #           done
+
+# # name: "PR title check"
+
+# # on:
+# #   pull_request:
+# #     branches:
+# #       - main
+# #       - develop
+# #   workflow_dispatch:
+
+# # jobs:
+# #   verify_title:
+# #     runs-on: ubuntu-latest
+# #     steps:
+# #       - name: Check title syntax
+# #         run: |
+# #           echo "DEBUG: ${{ github.event.pull_request.title }}"
+# #           echo "${{ github.event.pull_request.title }}" | grep -E "(^[A-Z]+-[0-9]+: \w+)|(^Merge branch .*)"
+
+# # name: "PR commit message check"
+
+# # on:
+# #   pull_request:
+# #     branches:
+# #       - main
+# #       - develop
+# #   workflow_dispatch:
+
+# # jobs:
+# #   verify_commits:
+# #     runs-on: ubuntu-latest
+# #     steps:
+# #       - name: Check commit messages
+# #         run: |
+# #           echo "Checking commit messages..."
+# #           # Get all commits in the PR
+# #           COMMITS=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+# #             "${{ github.event.pull_request.commits_url }}" | jq -r '.[].commit.message')
+
+# #           echo "$COMMITS" | while read -r COMMIT_MSG; do
+# #             echo "Checking: $COMMIT_MSG"
+# #             echo "$COMMIT_MSG" | grep -Eq "(^[A-Z]+-[0-9]+: .+)|(^Merge branch .*)" || {
+# #               echo "Commit message does not match required format: $COMMIT_MSG"
+# #               exit 1
+# #             }
+# #           done
