@@ -1,0 +1,40 @@
+name: "Check PR title and commit format"
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+
+jobs:
+  validate_format:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.head_ref }}
+
+      - name: Validate PR title and commit messages
+        run: |
+          REGEX="^[A-Z]+-[0-9]+: .+"
+
+          # Validate PR title
+          TITLE="${{ github.event.pull_request.title }}"
+          echo "$TITLE" | grep -Eq "$REGEX" || {
+            echo "❌ Invalid PR title: '$TITLE'"
+            echo "✅ Expected format: TICKET-NUMBER: Description (e.g., ABC-123: Add login feature)"
+            exit 1
+          }
+
+          # Validate each commit message
+          git fetch origin
+          git log --pretty=format:"%s" ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} | while read -r msg; do
+            echo "$msg" | grep -Eq "$REGEX" || {
+              echo "❌ Invalid commit message: '$msg'"
+              echo "✅ Expected format: TICKET-NUMBER: Commit message (e.g., ABC-123: Fix null pointer)"
+              exit 1
+            }
+          done
