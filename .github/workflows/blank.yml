@@ -17,23 +17,23 @@ jobs:
           fetch-depth: 0
           ref: ${{ github.head_ref }}
 
-      - name: Fetch base branch
-        run: git fetch origin ${{ github.event.pull_request.base.ref }}
-
       - name: Validate PR title and commits
         run: |
           REGEX="^[A-Z]+-[0-9]+: .+|^Merge branch .*"
 
           # Check PR title
           echo "${{ github.event.pull_request.title }}" | grep -Eq "$REGEX" || {
-            echo "Invalid PR title: '${{ github.event.pull_request.title }}'"
+            echo "❌ Invalid PR title: '${{ github.event.pull_request.title }}'"
             exit 1
           }
 
-          # Check each commit message
-          git log --pretty=format:"%s" origin/${{ github.event.pull_request.base.ref }}..HEAD | while read -r msg; do
+          # Get commit range from GitHub's PR context
+          git fetch origin
+          COMMITS=$(git log --pretty=format:"%s" ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }})
+
+          for msg in $COMMITS; do
             echo "$msg" | grep -Eq "$REGEX" || {
-              echo "Invalid commit message: '$msg'"
+              echo "❌ Invalid commit message: '$msg'"
               exit 1
             }
           done
