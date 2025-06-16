@@ -23,7 +23,7 @@ jobs:
           git log --pretty=format:"%s" origin/${{ github.event.pull_request.base.ref }}..HEAD | while read -r COMMIT_MSG; do
             echo "🔸 Commit: $COMMIT_MSG"
             echo "$COMMIT_MSG" | grep -Eq "(^[A-Z]+-[0-9]+: .+)|(^Merge branch .*)" || {
-              echo "❌ Commit message does not match required format:"
+              echo "Commit message does not match required format:"
               echo "   ➤ $COMMIT_MSG"
               exit 1
             }
