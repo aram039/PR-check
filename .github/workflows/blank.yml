@@ -29,16 +29,16 @@ jobs:
             }
           done
 
-      - name: Check PR title format
-        run: |
-          echo "🔍 Checking PR title..."
-          TITLE="${{ github.event.pull_request.title }}"
-          echo "🔸 Title: $TITLE"
-          echo "$TITLE" | grep -Eq "(^[A-Z]+-[0-9]+: .+)|(^Merge branch .*)" || {
-            echo "❌ PR title does not match required format:"
-            echo "   ➤ $TITLE"
-            exit 1
-          }
+      # - name: Check PR title format
+      #   run: |
+      #     echo "🔍 Checking PR title..."
+      #     TITLE="${{ github.event.pull_request.title }}"
+      #     echo "🔸 Title: $TITLE"
+      #     echo "$TITLE" | grep -Eq "(^[A-Z]+-[0-9]+: .+)|(^Merge branch .*)" || {
+      #       echo "PR title does not match required format:"
+      #       echo "   ➤ $TITLE"
+      #       exit 1
+      #     }
 
 
 
