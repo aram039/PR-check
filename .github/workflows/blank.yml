@@ -1,0 +1,17 @@
+name: "PR title check"
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+
+jobs:
+  verify_title:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check title syntax
+        run: |
+          echo "DEBUG: ${{ github.event.pull_request.title }}"
+          echo "${{ github.event.pull_request.title }}" | grep -E "(^[A-Z]+-[0-9]+: \w+)|(^Merge branch .*)"
