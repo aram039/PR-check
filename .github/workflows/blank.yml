@@ -1,4 +1,4 @@
-name: "PR title and commit message check"
+name: "PR commit and title check"
 
 on:
   pull_request:
@@ -14,29 +14,32 @@ jobs:
       - name: Check out PR code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Ensure full history is available
-
-      - name: Check PR title format
-        run: |
-          echo "Checking PR title..."
-          echo "DEBUG: ${{ github.event.pull_request.title }}"
-          echo "${{ github.event.pull_request.title }}" | grep -Eq "(^[A-Z]+-[0-9]+: .+)|(^Merge branch .*)" || {
-            echo "PR title does not match required format: ${{ github.event.pull_request.title }}"
-            exit 1
-          }
+          fetch-depth: 0  # Ensure full commit history
 
       - name: Check commit message formats
         run: |
-          echo "Checking commit messages..."
+          echo "🔍 Checking commit messages..."
 
-          # Get all commit SHAs between base and head
           git log --pretty=format:"%s" origin/${{ github.event.pull_request.base.ref }}..HEAD | while read -r COMMIT_MSG; do
-            echo "Checking: $COMMIT_MSG"
+            echo "🔸 Commit: $COMMIT_MSG"
             echo "$COMMIT_MSG" | grep -Eq "(^[A-Z]+-[0-9]+: .+)|(^Merge branch .*)" || {
-              echo "Commit message does not match required format: $COMMIT_MSG"
+              echo "❌ Commit message does not match required format:"
+              echo "   ➤ $COMMIT_MSG"
               exit 1
             }
           done
+
+      - name: Check PR title format
+        run: |
+          echo "🔍 Checking PR title..."
+          TITLE="${{ github.event.pull_request.title }}"
+          echo "🔸 Title: $TITLE"
+          echo "$TITLE" | grep -Eq "(^[A-Z]+-[0-9]+: .+)|(^Merge branch .*)" || {
+            echo "❌ PR title does not match required format:"
+            echo "   ➤ $TITLE"
+            exit 1
+          }
+
 
 
 # name: "PR title and commit message check"
